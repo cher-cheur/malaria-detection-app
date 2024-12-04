@@ -1,3 +1,7 @@
+import os
+import logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TF GPU warnings
+
 from flask import Flask, request, jsonify, render_template
 import tensorflow as tf
 import numpy as np
