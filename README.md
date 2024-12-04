@@ -27,6 +27,12 @@ This application is intended for **educational and research purposes only**. Ple
 - OpenCV
 - Bootstrap for UI
 
+## CI/CD
+
+- Automated testing and deployment using GitHub Actions
+- Continuous Integration: `main` branch is automatically built and tested on every push
+- Continuous Deployment: `main` branch is automatically deployed to production on every successful build
+
 ## Local Development
 
 ### Prerequisites
