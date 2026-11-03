@@ -29,9 +29,13 @@ This application is intended for **educational and research purposes only**. Ple
 
 ## CI/CD
 
-- Automated testing and deployment using GitHub Actions
-- Continuous Integration: `main` branch is automatically built and tested on every push
-- Continuous Deployment: `main` branch is automatically deployed to production on every successful build
+The app is **not currently deployed**. The repository includes a GitHub Actions workflow (`.github/workflows/azure-deploy.yml`) that shows how to deploy it to Azure:
+
+- The workflow is **manual only**: it never runs on push or on pull requests. Start it from the **Actions** tab with **Run workflow**.
+- It only deploys the `main` branch.
+- It builds the Docker image, pushes it to Azure Container Registry and deploys it to an Azure Web App.
+- It needs these repository secrets: `AZURE_CREDENTIALS`, `ACR_LOGIN_SERVER`, `ACR_USERNAME`, `ACR_PASSWORD`.
+- The repository has no automated tests yet.
 
 ## Local Development
 

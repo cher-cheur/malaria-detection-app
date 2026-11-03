@@ -1,10 +1,8 @@
 name: Deploy to Azure
 
-# Deploy only from main. Pull requests must never reach production
-# without review, so no pull_request trigger here.
+# Manual deployment only: this workflow never runs on its own.
+# Start it from the Actions tab ("Run workflow"), on the main branch.
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +15,8 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Refuse to deploy anything other than main
+    if: github.ref == 'refs/heads/main'
 
     steps:
     - uses: actions/checkout@v4
