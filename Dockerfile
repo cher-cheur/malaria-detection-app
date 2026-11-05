@@ -1,26 +1,22 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Python 3.12 (3.9 reached end of life in October 2025)
+FROM python:3.12-slim-bookworm
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    TF_CPP_MIN_LOG_LEVEL=2
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-# Install any needed packages specified in requirements.txt
+# Install dependencies first to benefit from layer caching.
+# opencv-python-headless needs no GUI/OpenGL system libraries.
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 5000 available to the world outside this container
+# Run as an unprivileged user
+RUN useradd --create-home --uid 10001 appuser
+COPY --chown=appuser:appuser . /app
+USER appuser
+
 EXPOSE 5000
 
-# Define environment variable
-ENV FLASK_APP=app.py
-
-# Run app.py when the container launches
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "60", "app:app"]

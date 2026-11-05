@@ -8,7 +8,12 @@ import numpy as np
 import cv2
 import io
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
 app = Flask(__name__)
+# Reject uploads larger than 5 MB (Flask answers 413 automatically)
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 # Load the model
 model = tf.keras.models.load_model('best_model.keras')
@@ -21,6 +26,8 @@ def preprocess_image(image_bytes):
         nparr = np.frombuffer(image_bytes, np.uint8)
         # Decode image
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            raise ValueError("Uploaded file is not a valid image")
         # Convert BGR to RGB
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # Resize image
@@ -77,9 +84,16 @@ def predict():
             'prediction': predicted_class,
             'confidence': f"{confidence * 100:.2f}%"
         })
-    except Exception as e:
-        print(f"Error during prediction: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+    except ValueError:
+        return jsonify({'error': 'Invalid image file'}), 400
+    except Exception:
+        # Log details server-side only; never leak internals to the client
+        logger.exception("Error during prediction")
+        return jsonify({'error': 'Internal error during prediction'}), 500
+
+@app.errorhandler(413)
+def file_too_large(_error):
+    return jsonify({'error': 'File too large (max 5 MB)'}), 413
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
